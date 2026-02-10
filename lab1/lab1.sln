@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CheengizsRPG", "CheengizsRPG\CheengizsRPG.csproj", "{7D35542C-C0D7-4EC0-A4EF-8D1C5FA303F1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CheengizsTestLib", "CheengizsTestLib\CheengizsTestLib.csproj", "{DA618ABA-96D7-4A2B-B080-D77FF5DCDEF3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CheengizsRPG.Tests", "CheengizsRPG.Tests\CheengizsRPG.Tests.csproj", "{E5065536-112A-466F-B2E4-C74126E09F93}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestRunner", "TestRunner\TestRunner.csproj", "{FB2BF375-0DC7-40C8-A246-F1C496D2FDC6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7D35542C-C0D7-4EC0-A4EF-8D1C5FA303F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D35542C-C0D7-4EC0-A4EF-8D1C5FA303F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7D35542C-C0D7-4EC0-A4EF-8D1C5FA303F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7D35542C-C0D7-4EC0-A4EF-8D1C5FA303F1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA618ABA-96D7-4A2B-B080-D77FF5DCDEF3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA618ABA-96D7-4A2B-B080-D77FF5DCDEF3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA618ABA-96D7-4A2B-B080-D77FF5DCDEF3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA618ABA-96D7-4A2B-B080-D77FF5DCDEF3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E5065536-112A-466F-B2E4-C74126E09F93}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E5065536-112A-466F-B2E4-C74126E09F93}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E5065536-112A-466F-B2E4-C74126E09F93}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E5065536-112A-466F-B2E4-C74126E09F93}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB2BF375-0DC7-40C8-A246-F1C496D2FDC6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB2BF375-0DC7-40C8-A246-F1C496D2FDC6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB2BF375-0DC7-40C8-A246-F1C496D2FDC6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB2BF375-0DC7-40C8-A246-F1C496D2FDC6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
