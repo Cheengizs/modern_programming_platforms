@@ -144,4 +144,9 @@ public class Assert
             throw new AssertFailedException("!=1", "1", $"Expected collection to contain exactly one item. {message}");
         }
     }
+
+    public static void SpecificThrow(string message)
+    {
+        throw new AssertFailedException(message);
+    }
 }

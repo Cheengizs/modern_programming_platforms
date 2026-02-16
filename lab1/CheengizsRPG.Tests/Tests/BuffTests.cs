@@ -9,6 +9,10 @@ public class BuffTests
     private Hero _hero;
     private Enemy _enemy;
 
+    public BuffTests()
+    {
+    }
+
     [TestInitial]
     public void Setup()
     {
@@ -16,7 +20,7 @@ public class BuffTests
         _enemy = new Enemy("Dummy", 200, 0);
     }
 
-    [TestMethod]
+    [TestMethod(100)]
     public void Buff_DoubleDamage_IncreasesAttack()
     {
         var rage = new Buff("Rage", 2.0, 1);
@@ -26,7 +30,7 @@ public class BuffTests
         Assert.IsEqual(190, _enemy.CurrentHealth);
     }
 
-    [TestMethod]
+    [TestMethod(4)]
     public void Buff_HalfDamage_DecreasesAttack()
     {
         var weak = new Buff("Weakness", 0.5, 1);
@@ -36,7 +40,7 @@ public class BuffTests
         Assert.IsEqual(198, _enemy.CurrentHealth);
     }
 
-    [TestMethod]
+    [TestMethod(4)]
     public void Buff_Expires_AfterDuration()
     {
         var power = new Buff("Power", 2.0, 1);
@@ -49,7 +53,7 @@ public class BuffTests
         Assert.IsEqual(185, _enemy.CurrentHealth);
     }
 
-    [TestMethod]
+    [TestMethod(5)]
     public void Buff_Stacking_MultipliesDamage()
     {
         var b1 = new Buff("B1", 2.0, 1);
@@ -62,7 +66,7 @@ public class BuffTests
         Assert.IsEqual(180, _enemy.CurrentHealth);
     }
 
-    [TestMethod]
+    [TestMethod(2)]
     public void Buff_ZeroDuration_RemovesImmediately()
     {
         var b1 = new Buff("Flash", 10.0, 0); 
@@ -72,7 +76,7 @@ public class BuffTests
         Assert.IsEqual(195, _enemy.CurrentHealth);
     }
 
-    [TestMethod]
+    [TestMethod(2)]
     public void Buff_NegativeDuration_DoesNotCrash()
     {
         var b1 = new Buff("Bug", 2.0, -1);
@@ -81,11 +85,13 @@ public class BuffTests
         Assert.IsEqual(195, _enemy.CurrentHealth);
     }
 
-    [TestMethod]
+    [TestMethod(2)]
     public void Buff_IsExistsAfterZeroDuration_NotExists()
     {
         var buff = new Buff("NotABuff", 2.0, 0);
         _hero.AddBuff(buff);
         Assert.NotContains(_hero.Buffs, buff);
     }
+
+    
 }

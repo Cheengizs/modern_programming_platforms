@@ -3,9 +3,9 @@
 [AttributeUsage(AttributeTargets.Method)]
 public class TestMethodAttribute : Attribute 
 {
-    public string Description { get; }
-    public TestMethodAttribute(string description = "")
+    public int Priority { get; }
+    public TestMethodAttribute(int priority = 0)
     {
-        Description = description;
+        Priority = priority;
     }
 }

@@ -10,12 +10,14 @@ public class CombatTests
     private Enemy _enemy;
     private Weapon _sword;
 
+    
     [TestInitial]
     public void Setup()
     {
         _hero = new Hero("Arthur", 100);
         _enemy = new Enemy("Orc", 100, 10);
         _sword = new Weapon("Excalibur", 10, 20);
+        
     }
 
     [TestMethod]
