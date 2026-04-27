@@ -1,4 +1,7 @@
-﻿namespace TestRunner;
+﻿using System.Reflection;
+using UnitTestLib.Attributes;
+
+namespace TestRunner;
 
 public class Program
 {
@@ -16,7 +19,14 @@ public class Program
         }
 
         var executor = new TestExecutor();
-        executor.RunTests(path, mode, maxDegree);
+
+        Func<MethodInfo, bool> filterDelegate = method => 
+        {
+            var categoryAttr = method.GetCustomAttribute<CategoryAttribute>();
+            return categoryAttr == null || categoryAttr.Name != "Disabled"; 
+        };
+
+        executor.RunTests(path, mode, maxDegree, filterDelegate);
 
         Console.WriteLine("\nPress any key to exit...");
         Console.ReadKey();

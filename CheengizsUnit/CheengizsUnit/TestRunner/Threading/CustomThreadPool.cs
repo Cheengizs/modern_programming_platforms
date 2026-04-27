@@ -16,11 +16,16 @@ public class CustomThreadPool : IDisposable
     private readonly object _lock = new object();
     private readonly int _minThreads;
     private readonly int _maxThreads;
-    
+
     private int _totalThreads = 0;
     private int _activeThreads = 0;
     private bool _isDisposed = false;
     private readonly Timer _monitorTimer;
+
+    public event Action<int>? ThreadCreated;
+    public event Action<int>? ThreadDestroyed;
+    public event Action<int>? TaskEnqueued;
+    public event Action<int>? TaskCompleted;
 
     public CustomThreadPool(int minThreads, int maxThreads)
     {
@@ -37,13 +42,14 @@ public class CustomThreadPool : IDisposable
         lock (_lock)
         {
             if (_isDisposed) return;
-
             _tasks.Enqueue(new PoolTask { Action = taskAction, EnqueuedAt = DateTime.Now });
+            TaskEnqueued?.Invoke(_tasks.Count);
 
             if (_activeThreads == _totalThreads && _totalThreads < _maxThreads)
             {
                 StartNewThread();
             }
+
             Monitor.Pulse(_lock);
         }
     }
@@ -53,51 +59,65 @@ public class CustomThreadPool : IDisposable
         _totalThreads++;
         var thread = new Thread(WorkerLoop) { IsBackground = true };
         thread.Start();
+        ThreadCreated?.Invoke(thread.ManagedThreadId);
     }
 
     private void WorkerLoop()
     {
-        while (true)
+        try
         {
-            PoolTask task;
-            lock (_lock)
+            while (true)
             {
-                while (_tasks.Count == 0)
+                PoolTask task;
+                lock (_lock)
                 {
-                    if (_isDisposed)
+                    while (_tasks.Count == 0)
                     {
-                        _totalThreads--;
-                        return;
+                        if (_isDisposed)
+                        {
+                            _totalThreads--;
+                            return;
+                        }
+
+                        bool signaled = Monitor.Wait(_lock, TimeSpan.FromSeconds(3));
+                        if (!signaled && _totalThreads > _minThreads)
+                        {
+                            _totalThreads--;
+                            return;
+                        }
                     }
 
-                    bool signaled = Monitor.Wait(_lock, TimeSpan.FromSeconds(3));
-                    if (!signaled && _totalThreads > _minThreads)
-                    {
-                        _totalThreads--; 
-                        return;
-                    }
+                    task = _tasks.Dequeue();
+                    _activeThreads++;
                 }
-                task = _tasks.Dequeue();
-                _activeThreads++;
-            }
 
-            try
-            {
-                task.Action();
-            }
-            catch (Exception ex)
-            {
-                TestReporter.PrintError($"[Thread Fault] Recovering from error: {ex.Message}");
+                try
+                {
+                    task.Action();
+                    TaskCompleted?.Invoke(Thread.CurrentThread.ManagedThreadId);
+                }
+                catch (Exception ex)
+                {
+                    TestReporter.PrintError($"[Thread Fault] Recovering from error: {ex.Message}");
+                    lock (_lock)
+                    {
+                        _activeThreads--;
+                        _totalThreads--;
+                        if (_totalThreads < _minThreads) StartNewThread();
+                    }
+
+                    return;
+                }
+
                 lock (_lock)
                 {
                     _activeThreads--;
-                    _totalThreads--;
-                    if (_totalThreads < _minThreads) StartNewThread();
                 }
-                return; 
             }
-
-            lock (_lock) { _activeThreads--; }
+        }
+        finally
+        {
+            ThreadDestroyed?.Invoke(Thread.CurrentThread.ManagedThreadId);
         }
     }
 
@@ -108,7 +128,8 @@ public class CustomThreadPool : IDisposable
             if (_isDisposed) return;
 
             Console.ForegroundColor = ConsoleColor.Magenta;
-            Console.WriteLine($"[POOL MONITOR] Threads: {_totalThreads}/{_maxThreads} | Active: {_activeThreads} | Queue: {_tasks.Count}");
+            Console.WriteLine(
+                $"[POOL MONITOR] Threads: {_totalThreads}/{_maxThreads} | Active: {_activeThreads} | Queue: {_tasks.Count}");
             Console.ResetColor();
 
             if (_tasks.Count > 0 && (DateTime.Now - _tasks.Peek().EnqueuedAt).TotalMilliseconds > 1000)

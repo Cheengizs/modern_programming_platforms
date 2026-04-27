@@ -1,4 +1,5 @@
 ﻿using UnitTestLib.Exceptions;
+using System.Linq.Expressions;
 
 namespace UnitTestLib.Asserts;
 
@@ -133,4 +134,26 @@ public class AssertResult
     }
 
     public static void Fail(string message) => throw new AssertFailedException(message);
+    
+    public static void Check(Expression<Func<bool>> condition, string message = "")
+    {
+        var func = condition.Compile();
+        if (!func())
+        {
+            if (condition.Body is BinaryExpression binary)
+            {
+                var leftValue = Expression.Lambda(binary.Left).Compile().DynamicInvoke();
+                var rightValue = Expression.Lambda(binary.Right).Compile().DynamicInvoke();
+            
+                throw new AssertFailedException(
+                    $"Expression Failed: {condition.Body}. " +
+                    $"\nLeft Operand: <{leftValue}> " +
+                    $"\nOperator: {binary.NodeType} " +
+                    $"\nRight Operand: <{rightValue}>. " +
+                    $"\n{message}");
+            }
+        
+            throw new AssertFailedException($"Expression Failed: {condition.Body}. {message}");
+        }
+    }
 }

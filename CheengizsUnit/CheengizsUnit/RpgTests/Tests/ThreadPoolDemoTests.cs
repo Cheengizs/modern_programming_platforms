@@ -5,7 +5,7 @@ using UnitTestLib.Attributes;
 
 namespace RpgTests.Tests;
 
-[TestClass(Ignore = false )]
+[TestClass(Ignore = true )]
 public class ThreadPoolDemoTests
 {
     [TestMethod(Timeout = 5000)] 

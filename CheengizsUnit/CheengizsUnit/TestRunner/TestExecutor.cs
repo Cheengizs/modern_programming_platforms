@@ -17,7 +17,7 @@ public class TestExecutor
         public object[]? Parameters { get; set; }
     }
 
-    public void RunTests(string assemblyPath, InputHandler.ExecutionMode mode, int maxDegree)
+    public void RunTests(string assemblyPath, InputHandler.ExecutionMode mode, int maxDegree, Func<MethodInfo, bool>? testFilter = null)
     {
         if (!File.Exists(assemblyPath)) return;
         Assembly testsAssembly = Assembly.LoadFrom(assemblyPath);
@@ -38,16 +38,31 @@ public class TestExecutor
             object? sharedContext = classAttr?.ContextType != null 
                 ? Activator.CreateInstance(classAttr.ContextType) : null;
             
-            var testMethods = type.GetMethods().Where(m => m.IsDefined(typeof(TestMethodAttribute), false)).ToList();
+            var testMethods = type.GetMethods()
+                .Where(m => m.IsDefined(typeof(TestMethodAttribute), false))
+                .Where(m => testFilter == null || testFilter(m))
+                .ToList();
+
             var testCasesToRun = new List<TestCase>();
 
             foreach (var method in testMethods)
             {
-                var dataAttr = method.GetCustomAttribute(typeof(MethodDataAttribute), false);
+                var dataAttr = method.GetCustomAttribute<MethodDataAttribute>();
+                var dynamicDataAttr = method.GetCustomAttribute<DynamicDataAttribute>();
+
                 if (dataAttr != null)
                 {
                     var dataList = typeof(MethodDataAttribute).GetProperty("Data", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(dataAttr) as IEnumerable<object>;
                     if (dataList != null) foreach (var item in dataList) testCasesToRun.Add(new TestCase { Method = method, Parameters = new object[] { item } });
+                }
+                else if (dynamicDataAttr != null)
+                {
+                    var dataMethod = type.GetMethod(dynamicDataAttr.MethodName, BindingFlags.Public | BindingFlags.Static);
+                    if (dataMethod != null)
+                    {
+                        var data = (IEnumerable<object[]>)dataMethod.Invoke(null, null)!;
+                        foreach (var item in data) testCasesToRun.Add(new TestCase { Method = method, Parameters = item });
+                    }
                 }
                 else testCasesToRun.Add(new TestCase { Method = method, Parameters = null });
             }
@@ -77,6 +92,11 @@ public class TestExecutor
         using var countdown = new CountdownEvent(testCases.Count);
         using var pool = new CustomThreadPool(minThreads: 2, maxThreads: maxThreads);
 
+        pool.ThreadCreated += id => TestReporter.PrintError($"[Event] Thread Created: {id}");
+        pool.ThreadDestroyed += id => TestReporter.PrintError($"[Event] Thread Destroyed: {id}");
+        pool.TaskEnqueued += count => Console.WriteLine($"[Event] Task Enqueued. Queue Size: {count}");
+        pool.TaskCompleted += id => Console.WriteLine($"[Event] Task Completed by Thread: {id}");
+        
         Action CreateTask(TestCase tc) => () =>
         {
             ExecuteTestCase(tc, type, sharedContext);
